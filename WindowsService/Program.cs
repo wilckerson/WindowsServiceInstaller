@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpRaven;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ServiceProcess;
@@ -15,9 +16,14 @@ namespace WindowsService
         static void Main()
         {
 
+            RavenClient sentry = null;
+            try
+            {
+                var sentryKey = System.Configuration.ConfigurationManager.AppSettings["sentryKey"];
+                sentry = new RavenClient(sentryKey);
 #if DEBUG
 
-            var svc = new MyWindowsService();
+                var svc = new MyWindowsService();
             svc.OnDebug();
 #else
             
@@ -29,6 +35,11 @@ namespace WindowsService
             ServiceBase.Run(ServicesToRun);
             
 #endif
+            }
+            catch (Exception ex)
+            {
+                sentry?.Capture(new SharpRaven.Data.SentryEvent(ex));
+            }
         }
     }
 }

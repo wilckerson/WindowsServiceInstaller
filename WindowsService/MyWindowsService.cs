@@ -9,16 +9,23 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using WindowsService.Helper;
+using WindowsService.Integrations;
 
 namespace WindowsService
 {
     public partial class MyWindowsService : ServiceBase
     {
         Timer timer;
+        LogToFileHelper logToFile;
+        private FormulaCertaIntegration integracao;
 
         public MyWindowsService()
         {
             InitializeComponent();
+
+            var logFilePath = System.Configuration.ConfigurationManager.AppSettings["logFilePath"];
+            logToFile = new LogToFileHelper(logFilePath);
 
             //Reading the interval time from App.config
             var configInterval = System.Configuration.ConfigurationManager.AppSettings["timerIntervalMinutes"];
@@ -42,7 +49,7 @@ namespace WindowsService
         protected override void OnStart(string[] args)
         {
             var version = System.Configuration.ConfigurationManager.AppSettings["version"];
-            Log($"OnStart {version}");
+            logToFile.Log($"OnStart {version}");
 
             timer.Start();
 
@@ -61,34 +68,21 @@ namespace WindowsService
         protected override void OnStop()
         {
             var version = System.Configuration.ConfigurationManager.AppSettings["version"];
-            Log($"OnStop {version}");
+            logToFile.Log($"OnStop {version}");
 
             timer.Stop();
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Log("Timer_Elapsed 8");
-        }
-        
-        private void Log(string msg)
-        {
-            string logMsg = $"{DateTime.Now}: {msg}";
+            logToFile.Log("Timer_Elapsed");
 
-            var logFilePath = System.Configuration.ConfigurationManager.AppSettings["logFilePath"];
-
-            var directory = Path.GetDirectoryName(logFilePath);
-            if (!Directory.Exists(directory))
+            //Iniciando integração com formula certa
+            if (integracao == null)
             {
-                Directory.CreateDirectory(directory);
+                integracao = new FormulaCertaIntegration();
             }
-
-            using (StreamWriter sw = new StreamWriter(logFilePath, true))
-            {
-                Console.WriteLine(logMsg);
-                sw.WriteLine(logMsg);
-                sw.Close();
-            }
+            integracao.Run();
         }
     }
 }

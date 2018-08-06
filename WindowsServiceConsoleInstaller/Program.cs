@@ -33,16 +33,17 @@ namespace WindowsServiceConsoleInstaller
 
             //ASCII ART + Descrição
             Console.WriteLine(@"
-  _____           _        _           _            
- |_   _|         | |      | |         | |           
-   | |  _ __  ___| |_ __ _| | __ _  __| | ___  _ __ 
-   | | | '_ \/ __| __/ _` | |/ _` |/ _` |/ _ \| '__|
-  _| |_| | | \__ \ || (_| | | (_| | (_| | (_) | |   
- |_____|_| |_|___/\__\__,_|_|\__,_|\__,_|\___/|_|   
-                                                                                                       
+  _____  _                                _____            _        _   
+ |  __ \| |                              |  __ \          | |      | |  
+ | |__) | |__   __ _ _ __ _ __ ___   __ _| |__) |___   ___| | _____| |_ 
+ |  ___/| '_ \ / _` | '__| '_ ` _ \ / _` |  _  // _ \ / __| |/ / _ \ __|
+ | |    | | | | (_| | |  | | | | | | (_| | | \ \ (_) | (__|   <  __/ |_ 
+ |_|    |_| |_|\__,_|_|  |_| |_| |_|\__,_|_|  \_\___/ \___|_|\_\___|\__|
+                                                                        
+                                                                                                                          
 ===============================================================================
 
-    Instalador do Serviço Windows
+    Instalador do PharmaRocket WindowsService
 ");
 
             //Obtendo os parametros
@@ -212,7 +213,7 @@ namespace WindowsServiceConsoleInstaller
             System.Threading.Thread.Sleep(3000);
 
             var startResult = Exec("sc.exe", $" start \"{serviceName}\"", false);
-            if (startResult.Contains("1072"))
+            if (startResult.Contains("1072") || startResult.Contains("1053"))
             {
                 throw new Exception($"\n\n\n REINICIE O COMPUTADOR E TENTE NOVAMENTE \n\n {startResult} \n");
             }
